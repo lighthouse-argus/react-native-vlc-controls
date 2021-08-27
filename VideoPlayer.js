@@ -31,8 +31,6 @@ export default class VideoPlayer extends Component {
     volume: 1,
     title: '',
     rate: 1,
-    showTimeRemaining: true,
-    showHours: false,
   };
 
   constructor(props) {
@@ -53,8 +51,7 @@ export default class VideoPlayer extends Component {
 
       isFullscreen:
         this.props.isFullScreen || this.props.resizeMode === 'cover' || false,
-      showTimeRemaining: this.props.showTimeRemaining,
-      showHours: this.props.showHours,
+      showTimeRemaining: true,
       volumeTrackWidth: 0,
       volumeFillWidth: 0,
       seekerFillWidth: 0,
@@ -565,22 +562,10 @@ export default class VideoPlayer extends Component {
     const symbol = this.state.showRemainingTime ? '-' : '';
     time = Math.min(Math.max(time, 0), this.state.duration);
 
-    if (!this.state.showHours) {
-      const formattedMinutes = padStart(Math.floor(time / 60).toFixed(0), 2, 0);
-      const formattedSeconds = padStart(Math.floor(time % 60).toFixed(0), 2, 0);
-
-      return `${symbol}${formattedMinutes}:${formattedSeconds}`;
-    }
-
-    const formattedHours = padStart(Math.floor(time / 3600).toFixed(0), 2, 0);
-    const formattedMinutes = padStart(
-      (Math.floor(time / 60) % 60).toFixed(0),
-      2,
-      0,
-    );
+    const formattedMinutes = padStart(Math.floor(time / 60).toFixed(0), 2, 0);
     const formattedSeconds = padStart(Math.floor(time % 60).toFixed(0), 2, 0);
 
-    return `${symbol}${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+    return `${symbol}${formattedMinutes}:${formattedSeconds}`;
   }
 
   /**
@@ -952,9 +937,7 @@ export default class VideoPlayer extends Component {
     const backControl = this.props.disableBack
       ? this.renderNullControl()
       : this.renderBack();
-    const volumeControl = this.props.disableVolume
-      ? this.renderNullControl()
-      : this.renderVolume();
+    
     const fullscreenControl = this.props.disableFullscreen
       ? this.renderNullControl()
       : this.renderFullscreen();
@@ -975,7 +958,7 @@ export default class VideoPlayer extends Component {
           <SafeAreaView style={styles.controls.topControlGroup}>
             {backControl}
             <View style={styles.controls.pullRight}>
-              {volumeControl}
+              {/* {volumeControl} */}
               {fullscreenControl}
             </View>
           </SafeAreaView>
@@ -1004,6 +987,10 @@ export default class VideoPlayer extends Component {
   renderVolume() {
     return (
       <View style={styles.volume.container}>
+         <Image
+            style={styles.volume.icon}
+            source={require('./assets/img/volume.png')}
+          />
         <View
           style={[styles.volume.fill, {width: this.state.volumeFillWidth}]}
         />
@@ -1011,12 +998,9 @@ export default class VideoPlayer extends Component {
           style={[styles.volume.track, {width: this.state.volumeTrackWidth}]}
         />
         <View
-          style={[styles.volume.handle, {left: this.state.volumePosition}]}
+          style={[styles.volume.handle, {left: this.state.volumePosition + 10}]}
           {...this.player.volumePanResponder.panHandlers}>
-          <Image
-            style={styles.volume.icon}
-            source={require('./assets/img/volume.png')}
-          />
+          <View style={{width:12,height:12,borderRadius:6, backgroundColor:'white', marginLeft:10}} />
         </View>
       </View>
     );
@@ -1050,6 +1034,9 @@ export default class VideoPlayer extends Component {
     const playPauseControl = this.props.disablePlayPause
       ? this.renderNullControl()
       : this.renderPlayPause();
+      const volumeControl = this.props.disableVolume
+      ? this.renderNullControl()
+      : this.renderVolume();
 
     return (
       <Animated.View
@@ -1067,7 +1054,10 @@ export default class VideoPlayer extends Component {
           {seekbarControl}
           <SafeAreaView
             style={[styles.controls.row, styles.controls.bottomControlGroup]}>
+            <View style={styles.controls.playPauseContainer}>
             {playPauseControl}
+            {volumeControl}
+            </View>
             {this.renderTitle()}
             {timerControl}
           </SafeAreaView>
@@ -1362,7 +1352,7 @@ const styles = {
     },
     playPause: {
       position: 'relative',
-      width: 80,
+      width: 50,
       zIndex: 0,
     },
     title: {
@@ -1383,6 +1373,7 @@ const styles = {
       fontSize: 11,
       textAlign: 'right',
     },
+    playPauseContainer: {flexDirection:'row',alignItems:'center'}
   }),
   volume: StyleSheet.create({
     container: {
@@ -1390,9 +1381,8 @@ const styles = {
       justifyContent: 'flex-start',
       flexDirection: 'row',
       height: 1,
-      marginLeft: 20,
       marginRight: 20,
-      width: 150,
+      width: 165,
     },
     track: {
       backgroundColor: '#333',
@@ -1410,7 +1400,7 @@ const styles = {
       padding: 16,
     },
     icon: {
-      marginLeft: 7,
+      marginRight: 7,
     },
   }),
   seekbar: StyleSheet.create({
