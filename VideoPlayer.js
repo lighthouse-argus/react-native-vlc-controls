@@ -1,5 +1,6 @@
-import React, {Component} from 'react';
-import Video from 'react-native-video';
+import React, { Component } from 'react';
+import { VLCPlayer } from 'react-native-vlc-media-player';
+
 import {
   TouchableWithoutFeedback,
   TouchableHighlight,
@@ -12,6 +13,7 @@ import {
   Image,
   View,
   Text,
+  Platform
 } from 'react-native';
 import padStart from 'lodash/padStart';
 
@@ -67,6 +69,7 @@ export default class VideoPlayer extends Component {
       currentTime: 0,
       error: false,
       duration: 0,
+      playInBackground: false
     };
 
     /**
@@ -159,7 +162,7 @@ export default class VideoPlayer extends Component {
   }
 
   componentDidUpdate = prevProps => {
-    const {isFullscreen} = this.props;
+    const { isFullscreen } = this.props;
 
     if (prevProps.isFullscreen !== isFullscreen) {
       this.setState({
@@ -182,11 +185,11 @@ export default class VideoPlayer extends Component {
    * When load starts we display a loading icon
    * and show the controls.
    */
-  _onLoadStart() {
+  _onLoadStart(data) {
     let state = this.state;
     state.loading = true;
     this.loadAnimation();
-    this.setState(state);
+    this.setState(data);
 
     if (typeof this.props.onLoadStart === 'function') {
       this.props.onLoadStart(...arguments);
@@ -236,7 +239,7 @@ export default class VideoPlayer extends Component {
         this.props.onProgress(...arguments);
       }
 
-      this.setState(state);
+      this.setState({ ...state, ...{ loading: false } });
     }
   }
 
@@ -250,6 +253,7 @@ export default class VideoPlayer extends Component {
     if (state.scrubbing) {
       state.scrubbing = false;
       state.currentTime = data.currentTime;
+
 
       // Seeking may be false here if the user released the seek bar while the player was still processing
       // the last seek command. In this case, perform the steps that have been postponed.
@@ -268,7 +272,7 @@ export default class VideoPlayer extends Component {
    * Either close the video or go to a
    * new page.
    */
-  _onEnd() {}
+  _onEnd() { }
 
   /**
    * Set the error state to true which then
@@ -636,7 +640,11 @@ export default class VideoPlayer extends Component {
   seekTo(time = 0) {
     let state = this.state;
     state.currentTime = time;
-    this.player.ref.seek(time);
+    if (Platform.OS === 'ios') {
+      this.player.ref.seek(Number((time / this.state.duration).toFixed(17)));
+    } else {
+      this.player.ref.seek(value);
+    }
     this.setState(state);
   }
 
@@ -660,6 +668,7 @@ export default class VideoPlayer extends Component {
     if (state.volumeTrackWidth > 150) {
       state.volumeTrackWidth = 150;
     }
+
 
     this.setState(state);
   }
@@ -864,7 +873,6 @@ export default class VideoPlayer extends Component {
       onPanResponderMove: (evt, gestureState) => {
         let state = this.state;
         const position = this.state.volumeOffset + gestureState.dx;
-
         this.setVolumePosition(position);
         state.volume = this.calculateVolumeFromVolumePosition();
 
@@ -937,7 +945,7 @@ export default class VideoPlayer extends Component {
     const backControl = this.props.disableBack
       ? this.renderNullControl()
       : this.renderBack();
-    
+
     const fullscreenControl = this.props.disableFullscreen
       ? this.renderNullControl()
       : this.renderFullscreen();
@@ -987,20 +995,20 @@ export default class VideoPlayer extends Component {
   renderVolume() {
     return (
       <View style={styles.volume.container}>
-         <Image
-            style={styles.volume.icon}
-            source={require('./assets/img/volume.png')}
-          />
-        <View
-          style={[styles.volume.fill, {width: this.state.volumeFillWidth}]}
+        <Image
+          style={styles.volume.icon}
+          source={require('./assets/img/volume.png')}
         />
         <View
-          style={[styles.volume.track, {width: this.state.volumeTrackWidth}]}
+          style={[styles.volume.fill, { width: this.state.volumeFillWidth }]}
         />
         <View
-          style={[styles.volume.handle, {left: this.state.volumePosition + 10}]}
+          style={[styles.volume.track, { width: this.state.volumeTrackWidth }]}
+        />
+        <View
+          style={[styles.volume.handle, { left: this.state.volumePosition + 10 }]}
           {...this.player.volumePanResponder.panHandlers}>
-          <View style={{width:12,height:12,borderRadius:6, backgroundColor:'white', marginLeft:10}} />
+          <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: 'white', marginLeft: 10 }} />
         </View>
       </View>
     );
@@ -1034,7 +1042,7 @@ export default class VideoPlayer extends Component {
     const playPauseControl = this.props.disablePlayPause
       ? this.renderNullControl()
       : this.renderPlayPause();
-      const volumeControl = this.props.disableVolume
+    const volumeControl = this.props.disableVolume
       ? this.renderNullControl()
       : this.renderVolume();
 
@@ -1055,8 +1063,8 @@ export default class VideoPlayer extends Component {
           <SafeAreaView
             style={[styles.controls.row, styles.controls.bottomControlGroup]}>
             <View style={styles.controls.playPauseContainer}>
-            {playPauseControl}
-            {volumeControl}
+              {playPauseControl}
+              {volumeControl}
             </View>
             {this.renderTitle()}
             {timerControl}
@@ -1093,12 +1101,12 @@ export default class VideoPlayer extends Component {
           />
         </View>
         <View
-          style={[styles.seekbar.handle, {left: this.state.seekerPosition}]}
+          style={[styles.seekbar.handle, { left: this.state.seekerPosition }]}
           pointerEvents={'none'}>
           <View
             style={[
               styles.seekbar.circle,
-              {backgroundColor: this.props.seekColor || '#FFF'},
+              { backgroundColor: this.props.seekColor || '#FFF' },
             ]}
             pointerEvents={'none'}
           />
@@ -1205,22 +1213,42 @@ export default class VideoPlayer extends Component {
         onPress={this.events.onScreenTouch}
         style={[styles.player.container, this.styles.containerStyle]}>
         <View style={[styles.player.container, this.styles.containerStyle]}>
-          <Video
-            {...this.props}
+          <VLCPlayer
             ref={videoPlayer => (this.player.ref = videoPlayer)}
-            resizeMode={this.state.resizeMode}
+            source={{
+              ...this.props.source, ...{
+                initType: 2,
+                hwDecoderEnabled: 1,
+                hwDecoderForced: 1,
+                initOptions: [
+                  // '--no-audio',
+                  '--rtsp-tcp',
+                  '--network-caching=150',
+                  '--rtsp-caching=150',
+                  '--no-stats',
+                  '--tcp-caching=150',
+                  '--realrtsp-caching=150',
+                ],
+              }
+            }}
+            autoplay={true}
+            onPlaying={this.events.onLoadStart}
             volume={this.state.volume}
+            rate={this.props.rate}
             paused={this.state.paused}
             muted={this.state.muted}
-            rate={this.state.rate}
-            onLoadStart={this.events.onLoadStart}
-            onProgress={this.events.onProgress}
-            onError={this.events.onError}
-            onLoad={this.events.onLoad}
+            autoAspectRatio={true}
             onEnd={this.events.onEnd}
-            onSeek={this.events.onSeek}
+            resizeMode={this.state.resizeMode}
+            playInBackground={this.props.playInBackground}
+            isLive={true}
+            onProgress={this.events.onProgress}
+            autoReloadLive={true}
+            onOpen={(a) => {
+              console.log(a);
+            }}
+            repeat={this.props.repeat}
             style={[styles.player.video, this.styles.videoStyle]}
-            source={this.props.source}
           />
           {this.renderError()}
           {this.renderLoader()}
@@ -1373,7 +1401,7 @@ const styles = {
       fontSize: 11,
       textAlign: 'right',
     },
-    playPauseContainer: {flexDirection:'row',alignItems:'center'}
+    playPauseContainer: { flexDirection: 'row', alignItems: 'center' }
   }),
   volume: StyleSheet.create({
     container: {
