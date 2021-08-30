@@ -124,7 +124,7 @@ export default class VideoPlayer extends Component {
       volumeWidth: 150,
       iconOffset: 0,
       seekerWidth: 0,
-      ref: Video,
+      ref: VLCPlayer,
       scrubbingTimeStep: this.props.scrubbing || 0,
       tapAnywhereToPause: this.props.tapAnywhereToPause,
     };
