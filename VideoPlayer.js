@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { VLCPlayer } from 'react-native-vlc-media-player';
+import { VLCPlayer } from '@akayush/react-native-vlc-media-player';
 
 import {
   TouchableWithoutFeedback,
