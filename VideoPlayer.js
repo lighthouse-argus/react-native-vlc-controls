@@ -1238,17 +1238,15 @@ export default class VideoPlayer extends Component {
             paused={this.state.paused}
             muted={this.state.muted}
             autoAspectRatio={true}
-            onEnd={this.events.onEnd}
             resizeMode={this.state.resizeMode}
             playInBackground={this.props.playInBackground}
             isLive={true}
             onProgress={this.events.onProgress}
             autoReloadLive={true}
-            onOpen={(a) => {
-              console.log(a);
-            }}
             repeat={this.props.repeat}
             style={[styles.player.video, this.styles.videoStyle]}
+            onEnded={this.events.onEnd}
+            onError={this.events.onError}
           />
           {this.renderError()}
           {this.renderLoader()}
