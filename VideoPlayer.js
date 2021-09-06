@@ -550,7 +550,7 @@ export default class VideoPlayer extends Component {
   calculateTime() {
     if (this.state.showTimeRemaining) {
       const time = this.state.duration - this.state.currentTime;
-      return `-${this.formatTime(time)}`;
+      return `${this.formatTime(time)}`;
     }
 
     return this.formatTime(this.state.currentTime);
@@ -562,14 +562,16 @@ export default class VideoPlayer extends Component {
    * @param {int} time time in milliseconds
    * @return {string} formatted time string in mm:ss format
    */
-  formatTime(time = 0) {
-    const symbol = this.state.showRemainingTime ? '-' : '';
-    time = Math.min(Math.max(time, 0), this.state.duration);
-
-    const formattedMinutes = padStart(Math.floor(time / 60).toFixed(0), 2, 0);
-    const formattedSeconds = padStart(Math.floor(time % 60).toFixed(0), 2, 0);
-
-    return `${symbol}${formattedMinutes}:${formattedSeconds}`;
+  formatTime(secs = 0) {
+      const sec_num = parseInt(secs, 10);
+      const hours = Math.floor(sec_num / 6000000);
+      const minutes = Math.floor(sec_num / 60000);
+      const seconds = Math.floor(sec_num / 1000);
+    
+      return [hours, minutes, seconds]
+        .map(v => (v < 10 ? '0' + v : v))
+        .filter((v, i) => v !== '00' || i > 0)
+        .join(':');
   }
 
   /**
