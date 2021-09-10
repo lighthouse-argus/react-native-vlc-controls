@@ -15,12 +15,11 @@ import {
   Text,
   Platform
 } from 'react-native';
-import padStart from 'lodash/padStart';
 
 export default class VideoPlayer extends Component {
   static defaultProps = {
     toggleResizeModeOnFullscreen: true,
-    controlAnimationTiming: 500,
+    controlAnimationTiming: 1000,
     doubleTapTime: 130,
     playInBackground: false,
     playWhenInactive: false,
@@ -563,15 +562,15 @@ export default class VideoPlayer extends Component {
    * @return {string} formatted time string in mm:ss format
    */
   formatTime(secs = 0) {
-      const sec_num = parseInt(secs, 10);
-      const hours = Math.floor(sec_num / 6000000);
-      const minutes = Math.floor(sec_num / 60000);
-      const seconds = Math.floor(sec_num / 1000);
-    
-      return [hours, minutes, seconds]
-        .map(v => (v < 10 ? '0' + v : v))
-        .filter((v, i) => v !== '00' || i > 0)
-        .join(':');
+    const sec_num = parseInt(secs, 10);
+    const hours = Math.floor(sec_num / 6000000);
+    const minutes = Math.floor(sec_num / 60000);
+    const seconds = Math.floor(sec_num / 1000);
+
+    return [hours, minutes, seconds]
+      .map(v => (v < 10 ? '0' + v : v))
+      .filter((v, i) => v !== '00' || i > 0)
+      .join(':');
   }
 
   /**
@@ -582,6 +581,7 @@ export default class VideoPlayer extends Component {
    * @param {float} position position in px of seeker handle}
    */
   setSeekerPosition(position = 0) {
+    if(position >= 0){
     let state = this.state;
     position = this.constrainToSeekerMinMax(position);
 
@@ -591,8 +591,8 @@ export default class VideoPlayer extends Component {
     if (!state.seeking) {
       state.seekerOffset = position;
     }
-
     this.setState(state);
+  }
   }
 
   /**
@@ -1088,7 +1088,7 @@ export default class VideoPlayer extends Component {
         <View
           style={styles.seekbar.track}
           onLayout={event =>
-            (this.player.seekerWidth = event.nativeEvent.layout.width)
+              this.player.seekerWidth = parseInt(event.nativeEvent.layout.width)
           }
           pointerEvents={'none'}>
           <View
@@ -1214,42 +1214,42 @@ export default class VideoPlayer extends Component {
       <TouchableWithoutFeedback
         onPress={this.events.onScreenTouch}
         style={[styles.player.container, this.styles.containerStyle]}>
-        <View style={[styles.player.container, this.styles.containerStyle]}>
+        <View  style={[styles.player.container, this.styles.containerStyle]}>
           <VLCPlayer
             ref={videoPlayer => (this.player.ref = videoPlayer)}
             source={{
-              ...this.props.source, ...{
-                initType: 2,
-                hwDecoderEnabled: 1,
-                hwDecoderForced: 1,
-                initOptions: [
-                  // '--no-audio',
-                  '--rtsp-tcp',
-                  '--network-caching=150',
-                  '--rtsp-caching=150',
-                  '--no-stats',
-                  '--tcp-caching=150',
-                  '--realrtsp-caching=150',
-                ],
-              }
+              initType: 2,
+              hwDecoderEnabled: 1,
+              hwDecoderForced: 1,
+              uri:
+                this.props.source.uri,
+              initOptions: [
+                '--rtsp-tcp',
+                '--network-caching=150',
+                '--rtsp-caching=150',
+                '--no-stats',
+                '--tcp-caching=150',
+                '--realrtsp-caching=150',
+              ],
             }}
             autoplay={true}
+            autoAspectRatio={true}
+            isLive={true}
+            autoReloadLive={true}
             onPlaying={this.events.onLoadStart}
             volume={this.state.volume}
             rate={this.props.rate}
             paused={this.state.paused}
             muted={this.state.muted}
-            autoAspectRatio={true}
             resizeMode={this.state.resizeMode}
-            playInBackground={this.props.playInBackground}
-            isLive={true}
             onProgress={this.events.onProgress}
             autoReloadLive={true}
             repeat={this.props.repeat}
-            style={[styles.player.video, this.styles.videoStyle]}
+            style={this.styles.videoStyle}
             onEnded={this.events.onEnd}
-            onError={this.events.onError}
+            onError={alert}
           />
+
           {this.renderError()}
           {this.renderLoader()}
           {this.renderTopControls()}
@@ -1437,6 +1437,7 @@ const styles = {
       height: 28,
       marginLeft: 20,
       marginRight: 20,
+      width:'100%'
     },
     track: {
       backgroundColor: '#333',
