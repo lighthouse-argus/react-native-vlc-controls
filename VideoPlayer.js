@@ -1247,7 +1247,7 @@ export default class VideoPlayer extends Component {
             repeat={this.props.repeat}
             style={this.styles.videoStyle}
             onEnded={this.events.onEnd}
-            onError={alert}
+            onError={this.events.onError}
           />
 
           {this.renderError()}
