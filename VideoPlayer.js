@@ -1,3 +1,5 @@
+
+
 import React, { Component } from 'react';
 import { VLCPlayer } from '@akayush/react-native-vlc-media-player';
 
@@ -32,6 +34,8 @@ export default class VideoPlayer extends Component {
     volume: 1,
     title: '',
     rate: 1,
+    showTimeRemaining: true,
+    showHours: false,
   };
 
   constructor(props) {
@@ -52,7 +56,8 @@ export default class VideoPlayer extends Component {
 
       isFullscreen:
         this.props.isFullScreen || this.props.resizeMode === 'cover' || false,
-      showTimeRemaining: true,
+      showTimeRemaining: this.props.showTimeRemaining,
+      showHours: this.props.showHours,
       volumeTrackWidth: 0,
       volumeFillWidth: 0,
       seekerFillWidth: 0,
@@ -562,11 +567,15 @@ export default class VideoPlayer extends Component {
    * @return {string} formatted time string in mm:ss format
    */
   formatTime(secs = 0) {
+    
     const sec_num = parseInt(secs, 10);
     const hours = Math.floor(sec_num / 6000000);
     const minutes = Math.floor(sec_num / 60000);
     const seconds = Math.floor(sec_num / 1000);
-
+    
+    if(seconds === 0){
+      this.props.onEnd()
+    }
     return [hours, minutes, seconds]
       .map(v => (v < 10 ? '0' + v : v))
       .filter((v, i) => v !== '00' || i > 0)
