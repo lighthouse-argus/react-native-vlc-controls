@@ -1,11 +1,8 @@
-
-
 import React, { Component } from 'react';
 import { VLCPlayer } from '@akayush/react-native-vlc-media-player';
 
 import {
   TouchableWithoutFeedback,
-  TouchableHighlight,
   ImageBackground,
   PanResponder,
   StyleSheet,
@@ -15,8 +12,10 @@ import {
   Image,
   View,
   Text,
-  Platform
+  Platform,
+  Dimensions
 } from 'react-native';
+import {TouchableHighlight} from 'react-native-gesture-handler'
 
 export default class VideoPlayer extends Component {
   static defaultProps = {
@@ -93,7 +92,7 @@ export default class VideoPlayer extends Component {
       onError: this.props.onError || this._onError.bind(this),
       onBack: this.props.onBack || this._onBack.bind(this),
       onEnd: this.props.onEnd || this._onEnd.bind(this),
-      onScreenTouch: this._onScreenTouch.bind(this),
+      // onScreenTouch: this._onScreenTouch.bind(this),
       onEnterFullscreen: this.props.onEnterFullscreen,
       onExitFullscreen: this.props.onExitFullscreen,
       onShowControls: this.props.onShowControls,
@@ -112,7 +111,7 @@ export default class VideoPlayer extends Component {
     this.methods = {
       toggleFullscreen: this._toggleFullscreen.bind(this),
       togglePlayPause: this._togglePlayPause.bind(this),
-      toggleControls: this._toggleControls.bind(this),
+      // toggleControls: this._toggleControls.bind(this),
       toggleTimer: this._toggleTimer.bind(this),
     };
 
@@ -214,9 +213,9 @@ export default class VideoPlayer extends Component {
     state.loading = false;
     this.setState(state);
 
-    if (state.showControls) {
-      this.setControlTimeout();
-    }
+    // if (state.showControls) {
+    //   this.setControlTimeout();
+    // }
 
     if (typeof this.props.onLoad === 'function') {
       this.props.onLoad(...arguments);
@@ -262,7 +261,7 @@ export default class VideoPlayer extends Component {
       // Seeking may be false here if the user released the seek bar while the player was still processing
       // the last seek command. In this case, perform the steps that have been postponed.
       if (!state.seeking) {
-        this.setControlTimeout();
+        // this.setControlTimeout();
         state.paused = state.originallyPaused;
       }
 
@@ -298,28 +297,31 @@ export default class VideoPlayer extends Component {
    * One tap toggles controls and/or toggles pause,
    * two toggles fullscreen mode.
    */
-  _onScreenTouch() {
-    if (this.player.tapActionTimeout) {
-      clearTimeout(this.player.tapActionTimeout);
-      this.player.tapActionTimeout = 0;
-      this.methods.toggleFullscreen();
-      const state = this.state;
-      if (state.showControls) {
-        this.resetControlTimeout();
-      }
-    } else {
-      this.player.tapActionTimeout = setTimeout(() => {
-        const state = this.state;
-        if (this.player.tapAnywhereToPause && state.showControls) {
-          this.methods.togglePlayPause();
-          this.resetControlTimeout();
-        } else {
-          this.methods.toggleControls();
-        }
-        this.player.tapActionTimeout = 0;
-      }, this.props.doubleTapTime);
-    }
-  }
+  // _onScreenTouch() {
+  //   if (this.player.tapActionTimeout) {
+  //     debugger
+  //     clearTimeout(this.player.tapActionTimeout);
+  //     this.player.tapActionTimeout = 0;
+  //     this.methods.toggleFullscreen();
+  //     const state = this.state;
+  //     if (state.showControls) {
+  //       this.resetControlTimeout();
+  //     }
+  //   } else {
+  //     this.player.tapActionTimeout = setTimeout(() => {
+  //       debugger
+  //       const state = this.state;
+  //       if (this.player.tapAnywhereToPause && state.showControls) {
+  //         this.methods.togglePlayPause();
+  //         this.resetControlTimeout();
+  //       } else {
+  //         this.methods.toggleControls();
+  //       }
+  //       this.player.tapActionTimeout = 0;
+  //     }, this.props.doubleTapTime);
+  //     debugger
+  //   }
+  // }
 
   /**
     | -------------------------------------------------------
@@ -338,86 +340,86 @@ export default class VideoPlayer extends Component {
    * that hides them after a length of time.
    * Default is 15s
    */
-  setControlTimeout() {
-    this.player.controlTimeout = setTimeout(() => {
-      this._hideControls();
-    }, this.player.controlTimeoutDelay);
-  }
+  // setControlTimeout() {
+  //   this.player.controlTimeout = setTimeout(() => {
+  //     this._hideControls();
+  //   }, this.player.controlTimeoutDelay);
+  // }
 
   /**
    * Clear the hide controls timeout.
    */
-  clearControlTimeout() {
-    clearTimeout(this.player.controlTimeout);
-  }
+  // clearControlTimeout() {
+  //   clearTimeout(this.player.controlTimeout);
+  // }
 
   /**
    * Reset the timer completely
    */
-  resetControlTimeout() {
-    this.clearControlTimeout();
-    this.setControlTimeout();
-  }
+  // resetControlTimeout() {
+  //   this.clearControlTimeout();
+  //   this.setControlTimeout();
+  // }
 
   /**
    * Animation to hide controls. We fade the
    * display to 0 then move them off the
    * screen so they're not interactable
    */
-  hideControlAnimation() {
-    Animated.parallel([
-      Animated.timing(this.animations.topControl.opacity, {
-        toValue: 0,
-        duration: this.props.controlAnimationTiming,
-        useNativeDriver: false,
-      }),
-      Animated.timing(this.animations.topControl.marginTop, {
-        toValue: -100,
-        duration: this.props.controlAnimationTiming,
-        useNativeDriver: false,
-      }),
-      Animated.timing(this.animations.bottomControl.opacity, {
-        toValue: 0,
-        duration: this.props.controlAnimationTiming,
-        useNativeDriver: false,
-      }),
-      Animated.timing(this.animations.bottomControl.marginBottom, {
-        toValue: -100,
-        duration: this.props.controlAnimationTiming,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }
+  // hideControlAnimation() {
+  //   Animated.parallel([
+  //     Animated.timing(this.animations.topControl.opacity, {
+  //       toValue: 0,
+  //       duration: this.props.controlAnimationTiming,
+  //       useNativeDriver: false,
+  //     }),
+  //     Animated.timing(this.animations.topControl.marginTop, {
+  //       toValue: -100,
+  //       duration: this.props.controlAnimationTiming,
+  //       useNativeDriver: false,
+  //     }),
+  //     Animated.timing(this.animations.bottomControl.opacity, {
+  //       toValue: 0,
+  //       duration: this.props.controlAnimationTiming,
+  //       useNativeDriver: false,
+  //     }),
+  //     Animated.timing(this.animations.bottomControl.marginBottom, {
+  //       toValue: -100,
+  //       duration: this.props.controlAnimationTiming,
+  //       useNativeDriver: false,
+  //     }),
+  //   ]).start();
+  // }
 
   /**
    * Animation to show controls...opposite of
    * above...move onto the screen and then
    * fade in.
    */
-  showControlAnimation() {
-    Animated.parallel([
-      Animated.timing(this.animations.topControl.opacity, {
-        toValue: 1,
-        useNativeDriver: false,
-        duration: this.props.controlAnimationTiming,
-      }),
-      Animated.timing(this.animations.topControl.marginTop, {
-        toValue: 0,
-        useNativeDriver: false,
-        duration: this.props.controlAnimationTiming,
-      }),
-      Animated.timing(this.animations.bottomControl.opacity, {
-        toValue: 1,
-        useNativeDriver: false,
-        duration: this.props.controlAnimationTiming,
-      }),
-      Animated.timing(this.animations.bottomControl.marginBottom, {
-        toValue: 0,
-        useNativeDriver: false,
-        duration: this.props.controlAnimationTiming,
-      }),
-    ]).start();
-  }
+  // showControlAnimation() {
+  //   Animated.parallel([
+  //     Animated.timing(this.animations.topControl.opacity, {
+  //       toValue: 1,
+  //       useNativeDriver: false,
+  //       duration: this.props.controlAnimationTiming,
+  //     }),
+  //     Animated.timing(this.animations.topControl.marginTop, {
+  //       toValue: 0,
+  //       useNativeDriver: false,
+  //       duration: this.props.controlAnimationTiming,
+  //     }),
+  //     Animated.timing(this.animations.bottomControl.opacity, {
+  //       toValue: 1,
+  //       useNativeDriver: false,
+  //       duration: this.props.controlAnimationTiming,
+  //     }),
+  //     Animated.timing(this.animations.bottomControl.marginBottom, {
+  //       toValue: 0,
+  //       useNativeDriver: false,
+  //       duration: this.props.controlAnimationTiming,
+  //     }),
+  //   ]).start();
+  // }
 
   /**
    * Loop animation to spin loader icon. If not loading then stop loop.
@@ -445,40 +447,40 @@ export default class VideoPlayer extends Component {
    * Function to hide the controls. Sets our
    * state then calls the animation.
    */
-  _hideControls() {
-    if (this.mounted) {
-      let state = this.state;
-      state.showControls = false;
-      this.hideControlAnimation();
-      typeof this.events.onHideControls === 'function' &&
-        this.events.onHideControls();
+  // _hideControls() {
+    // if (this.mounted) {
+    //   let state = this.state;
+    //   state.showControls = false;
+    //   this.hideControlAnimation();
+    //   typeof this.events.onHideControls === 'function' &&
+    //     this.events.onHideControls();
 
-      this.setState(state);
-    }
-  }
+    //   this.setState(state);
+    // }
+  // }
 
   /**
    * Function to toggle controls based on
    * current state.
    */
-  _toggleControls() {
-    let state = this.state;
-    state.showControls = !state.showControls;
+  // _toggleControls() {
+  //   let state = this.state;
+  //   state.showControls = !state.showControls;
 
-    if (state.showControls) {
-      this.showControlAnimation();
-      this.setControlTimeout();
-      typeof this.events.onShowControls === 'function' &&
-        this.events.onShowControls();
-    } else {
-      this.hideControlAnimation();
-      this.clearControlTimeout();
-      typeof this.events.onHideControls === 'function' &&
-        this.events.onHideControls();
-    }
+  //   if (state.showControls) {
+  //     this.showControlAnimation();
+  //     this.setControlTimeout();
+  //     typeof this.events.onShowControls === 'function' &&
+  //       this.events.onShowControls();
+  //   } else {
+  //     this.hideControlAnimation();
+  //     this.clearControlTimeout();
+  //     typeof this.events.onHideControls === 'function' &&
+  //       this.events.onHideControls();
+  //   }
 
-    this.setState(state);
-  }
+  //   this.setState(state);
+  // }
 
   /**
    * Toggle fullscreen changes resizeMode on
@@ -780,7 +782,7 @@ export default class VideoPlayer extends Component {
    */
   componentWillUnmount() {
     this.mounted = false;
-    this.clearControlTimeout();
+    // this.clearControlTimeout();
   }
 
   /**
@@ -799,7 +801,7 @@ export default class VideoPlayer extends Component {
        */
       onPanResponderGrant: (evt, gestureState) => {
         let state = this.state;
-        this.clearControlTimeout();
+        // this.clearControlTimeout();
         const position = evt.nativeEvent.locationX;
         this.setSeekerPosition(position);
         state.seeking = true;
@@ -856,7 +858,7 @@ export default class VideoPlayer extends Component {
           state.seeking = false;
         } else {
           this.seekTo(time);
-          this.setControlTimeout();
+          // this.setControlTimeout();
           state.paused = state.originallyPaused;
           state.seeking = false;
         }
@@ -873,7 +875,7 @@ export default class VideoPlayer extends Component {
       onStartShouldSetPanResponder: (evt, gestureState) => true,
       onMoveShouldSetPanResponder: (evt, gestureState) => true,
       onPanResponderGrant: (evt, gestureState) => {
-        this.clearControlTimeout();
+        // this.clearControlTimeout();
       },
 
       /**
@@ -902,7 +904,7 @@ export default class VideoPlayer extends Component {
       onPanResponderRelease: (evt, gestureState) => {
         let state = this.state;
         state.volumeOffset = state.volumePosition;
-        this.setControlTimeout();
+        // this.setControlTimeout();
         this.setState(state);
       },
     });
@@ -932,7 +934,7 @@ export default class VideoPlayer extends Component {
         underlayColor="transparent"
         activeOpacity={0.3}
         onPress={() => {
-          this.resetControlTimeout();
+          // this.resetControlTimeout();
           callback();
         }}
         style={[styles.controls.control, style]}>
@@ -962,12 +964,12 @@ export default class VideoPlayer extends Component {
       : this.renderFullscreen();
 
     return (
-      <Animated.View
+      <View
         style={[
           styles.controls.top,
           {
-            opacity: this.animations.topControl.opacity,
-            marginTop: this.animations.topControl.marginTop,
+            opacity: 1,
+            marginTop: 0,
           },
         ]}>
         <ImageBackground
@@ -982,7 +984,7 @@ export default class VideoPlayer extends Component {
             </View>
           </SafeAreaView>
         </ImageBackground>
-      </Animated.View>
+      </View>
     );
   }
 
@@ -1058,13 +1060,10 @@ export default class VideoPlayer extends Component {
       : this.renderVolume();
 
     return (
-      <Animated.View
+      <View
         style={[
           styles.controls.bottom,
-          {
-            opacity: this.animations.bottomControl.opacity,
-            marginBottom: this.animations.bottomControl.marginBottom,
-          },
+
         ]}>
         <ImageBackground
           source={require('./assets/img/bottom-vignette.png')}
@@ -1081,7 +1080,7 @@ export default class VideoPlayer extends Component {
             {timerControl}
           </SafeAreaView>
         </ImageBackground>
-      </Animated.View>
+      </View>
     );
   }
 
@@ -1220,10 +1219,10 @@ export default class VideoPlayer extends Component {
    */
   render() {
     return (
-      <TouchableWithoutFeedback
-        onPress={this.events.onScreenTouch}
-        style={[styles.player.container, this.styles.containerStyle]}>
-        <View  style={[styles.player.container, this.styles.containerStyle]}>
+      // <TouchableWithoutFeedback
+      //   // onPress={this.events.onScreenTouch}
+      //   style={[styles.player.container, this.styles.containerStyle]}>
+        <View style={[styles.player.container, this.styles.containerStyle]}>
           <VLCPlayer
             ref={videoPlayer => (this.player.ref = videoPlayer)}
             source={{
@@ -1264,7 +1263,7 @@ export default class VideoPlayer extends Component {
           {this.renderTopControls()}
           {this.renderBottomControls()}
         </View>
-      </TouchableWithoutFeedback>
+      // </TouchableWithoutFeedback>
     );
   }
 }
@@ -1358,11 +1357,18 @@ const styles = {
       flex: 1,
       alignItems: 'stretch',
       justifyContent: 'flex-start',
+      position:'absolute',
+      top:0,
+      right:0,
+      width:'100%'
     },
     bottom: {
       alignItems: 'stretch',
-      flex: 2,
       justifyContent: 'flex-end',
+      flex:1,
+      position:'absolute',
+      bottom:0,
+      width:'100%'
     },
     topControlGroup: {
       alignSelf: 'stretch',
@@ -1379,7 +1385,6 @@ const styles = {
       justifyContent: 'space-between',
       marginLeft: 12,
       marginRight: 12,
-      marginBottom: 0,
     },
     volume: {
       flexDirection: 'row',
