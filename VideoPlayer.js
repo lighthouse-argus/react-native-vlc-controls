@@ -68,7 +68,7 @@ export default class VideoPlayer extends Component {
       seeking: false,
       originallyPaused: false,
       scrubbing: false,
-      loading: false,
+      loading: true,
       currentTime: 0,
       error: false,
       duration: 0,
@@ -232,6 +232,7 @@ export default class VideoPlayer extends Component {
     let state = this.state;
     if (!state.scrubbing) {
       state.currentTime = data.currentTime;
+      
 
       if (!state.seeking) {
         const position = this.calculateSeekerPosition();
@@ -241,7 +242,6 @@ export default class VideoPlayer extends Component {
       if (typeof this.props.onProgress === 'function') {
         this.props.onProgress(...arguments);
       }
-
       this.setState({ ...state, ...{ loading: false } });
     }
   }
@@ -574,8 +574,9 @@ export default class VideoPlayer extends Component {
     const hours = Math.floor(sec_num / 6000000);
     const minutes = Math.floor(sec_num / 60000);
     const seconds = Math.floor(sec_num / 1000);
-    
-    if(seconds === 0){
+    const remainingTime = parseInt(Math.abs(this.state.duration / 1000 - this.state.currentTime / 1000).toFixed());
+    //OnEndHandled
+    if(this.state.duration != 0 && remainingTime === 0  && seconds === 0){
       this.props.onEnd()
     }
     return [hours, minutes, seconds]
@@ -656,7 +657,7 @@ export default class VideoPlayer extends Component {
     if (Platform.OS === 'ios') {
       this.player.ref.seek(Number((time / this.state.duration).toFixed(17)));
     } else {
-      this.player.ref.seek(value);
+      this.player.ref.seek(parseInt(time/1000));
     }
     this.setState(state);
   }
