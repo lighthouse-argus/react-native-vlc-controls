@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { VLCPlayer } from '@akayush/react-native-vlc-media-player';
-
 import {
   TouchableWithoutFeedback,
   ImageBackground,
@@ -35,6 +34,7 @@ export default class VideoPlayer extends Component {
     rate: 1,
     showTimeRemaining: true,
     showHours: false,
+    disableProgressBar: false,
   };
 
   constructor(props) {
@@ -228,7 +228,7 @@ export default class VideoPlayer extends Component {
    *
    * @param {object} data The video meta data
    */
-  _onProgress(data = {}) {
+  _onProgress(data = {}){
     let state = this.state;
     if (!state.scrubbing) {
       state.currentTime = data.currentTime;
@@ -653,6 +653,7 @@ export default class VideoPlayer extends Component {
    */
   seekTo(time = 0) {
     let state = this.state;
+    console.log(time, this.state.duration)
     state.currentTime = time;
     if (Platform.OS === 'ios') {
       this.player.ref.seek(Number((time / this.state.duration).toFixed(17)));
@@ -768,6 +769,7 @@ export default class VideoPlayer extends Component {
    * bar based on the volume property supplied to it.
    */
   componentDidMount() {
+    this?.props?.handleRef(this);
     const position = this.calculateVolumePositionFromVolume();
     let state = this.state;
     this.setVolumePosition(position);
@@ -804,7 +806,8 @@ export default class VideoPlayer extends Component {
         let state = this.state;
         // this.clearControlTimeout();
         const position = evt.nativeEvent.locationX;
-        this.setSeekerPosition(position);
+        this.setSeekerPosition(position)
+        this.props.disableProgressBar && this.props.onPanResponderGrant(position)
         state.seeking = true;
         state.originallyPaused = state.paused;
         state.scrubbing = false;
@@ -819,7 +822,8 @@ export default class VideoPlayer extends Component {
        */
       onPanResponderMove: (evt, gestureState) => {
         const position = this.state.seekerOffset + gestureState.dx;
-        this.setSeekerPosition(position);
+        this.setSeekerPosition(position)
+        this.props.disableProgressBar && this.props.onPanResponderMove(position)
         let state = this.state;
 
         if (
@@ -1064,7 +1068,6 @@ export default class VideoPlayer extends Component {
       <View
         style={[
           styles.controls.bottom,
-
         ]}>
         <ImageBackground
           source={require('./assets/img/bottom-vignette.png')}
@@ -1252,7 +1255,6 @@ export default class VideoPlayer extends Component {
             muted={this.state.muted}
             resizeMode={this.state.resizeMode}
             onProgress={this.events.onProgress}
-            autoReloadLive={true}
             repeat={this.props.repeat}
             style={this.styles.videoStyle}
             onEnded={this.events.onEnd}
@@ -1261,8 +1263,8 @@ export default class VideoPlayer extends Component {
 
           {this.renderError()}
           {this.renderLoader()}
-          {this.renderTopControls()}
-          {this.renderBottomControls()}
+          {!this.props.disableProgressBar && this.renderTopControls()}
+          {!this.props.disableProgressBar && this.renderBottomControls()}
         </View>
       // </TouchableWithoutFeedback>
     );
@@ -1283,14 +1285,14 @@ const styles = {
       alignSelf: 'stretch',
       justifyContent: 'space-between',
     },
-    video: {
-      overflow: 'hidden',
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-    },
+    // video: {
+    //   overflow: 'hidden',
+    //   position: 'absolute',
+    //   top: 0,
+    //   right: 0,
+    //   bottom: 0,
+    //   left: 0,
+    // },
   }),
   error: StyleSheet.create({
     container: {
@@ -1369,7 +1371,7 @@ const styles = {
       flex:1,
       position:'absolute',
       bottom:0,
-      width:'100%'
+      width:'95%'
     },
     topControlGroup: {
       alignSelf: 'stretch',
