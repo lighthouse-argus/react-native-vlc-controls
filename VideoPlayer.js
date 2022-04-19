@@ -1245,7 +1245,7 @@ export default class VideoPlayer extends Component {
               ],
             }}
             autoplay={true}
-            autoAspectRatio={true}
+            autoAspectRatio={false}
             isLive={true}
             autoReloadLive={true}
             onPlaying={this.events.onLoadStart}
