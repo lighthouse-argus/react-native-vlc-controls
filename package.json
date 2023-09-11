@@ -18,7 +18,7 @@
   "author": "Nubix (https://github.com/itsnubix)",
   "repository": {
     "type": "git",
-    "url": "git@github.com:AkAyush/react-native-vlc-controls.git"
+    "url": "git@github.com:lighthouse-argus/react-native-vlc-controls.git"
   },
   "dependencies": {
     "lodash": "^4.16.4"
