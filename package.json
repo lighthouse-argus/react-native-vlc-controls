@@ -25,7 +25,7 @@
   },
   "peerDependencies": {
     "react-native": ">=0.46.0",
-    "@akayush/react-native-vlc-media-player": "https://github.com/AkAyush/react-native-vlc-media-player"
+    "@lighthouse-argus/react-native-vlc-media-player": "https://github.com/lighthouse-argus/react-native-vlc-media-player"
   },
   "devDependencies": {
     "@react-native-community/eslint-config": "^0.0.5",
